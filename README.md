@@ -11,7 +11,7 @@ Tool all-in-one buat jalanin pipeline recon 3 tahap:
 
 | Stage | Nama | Fungsi | Butuh |
 |-------|------|--------|-------|
-| 1 | **Scan Targets** | Ambil URL ber-param dari search engine berdasarkan dork | `requests`, `beautifulsoup4` |
+| 1 | **Scan Targets** | Ambil URL ber-param dari search engine (Bing, Yahoo, DDG) berdasarkan dork | `requests`, `beautifulsoup4`, `curl_cffi` |
 | 2 | **Validate Findings** | Probe error-based buat filter target yang beneran vulnerable | `requests` |
 | 3 | **Process Queue** | Auto-feed target tervalidasi ke sqlmap | **sqlmap (WAJIB)** |
 
@@ -76,24 +76,20 @@ python sqli_tool.py --sqlmap-path /path/ke/sqlmap.py
 text
 sqli-tool/
 ├── sqli_tool.py          # main script (CLI + Flask)
-├── split_dorks.py        # split & clean dork mentah
+├── split_dorks.py        # split & clean dork mentah (opsional)
 ├── requirements.txt      # dependency Python
 ├── README.md             # file ini
 ├── files/
-│   ├── raw_dorks.txt     # (input) file dork mentah lo
-│   ├── dorks.txt         # (auto) hasil split, siap pakai
-│   ├── sqli.txt          # (auto) dork SQLi parameter-based
-│   ├── error_sqli.txt    # (auto) dork error message SQLi
-│   ├── lfi.txt           # (auto) dork LFI/RFI
-│   ├── index_of.txt      # (auto) dork index of
-│   ├── password_file.txt # (auto) dork file sensitif
-│   ├── uncategorized.txt # (auto) sisanya
-│   ├── dorks_batch_*.txt # (auto) batch 50 dork
+│   ├── dorks.txt         # file dork siap pakai (1 per baris)
 │   └── useragents.txt    # daftar user-agent (1 per baris)
 ├── templates/
 │   └── index.html        # UI web (Flask)
-└── static/
-    └── style.css         # styling UI web
+├── static/
+│   └── style.css         # styling UI web
+└── hasil/                # (AUTO) Tempat semua output
+    ├── urls_crawl.txt    # Hasil crawl URL
+    ├── urls_vuln.txt     # Hasil URL yang rentan
+    └── sqlmap_dump/      # Hasil dump sqlmap
 🚀 Instalasi
 bash
 # 1. Copy project
@@ -106,94 +102,57 @@ pip install -r requirements.txt
 sqlmap --version
 
 # 4. Siap jalan
-🧹 Split & Clean Dork (Pertama Kali)
-Kalo lo punya file dork mentah (misal newsnews.phpid=.txt), jalanin dulu:
-
-bash
-# 1. Copy file mentah lo
-cp newsnews.phpid=.txt files/raw_dorks.txt
-
-# 2. Split & clean
-python split_dorks.py
-Hasilnya di files/:
-
-dorks.txt — siap pakai (gabungan SQLi + error SQLi, dedup)
-
-dorks_batch_01.txt, dorks_batch_02.txt, dst — batch 50 dork
-
-sqli.txt, error_sqli.txt, lfi.txt, index_of.txt, password_file.txt, uncategorized.txt
-
-Tips: Buat test awal, pake batch kecil dulu:
-
-bash
-mv files/dorks.txt files/dorks_full.txt
-cp files/dorks_batch_01.txt files/dorks.txt
 🖥️ Cara Jalanin
-Mode CLI — Menu Interaktif
+Mode Web (Flask) — Rekomendasi
 bash
-python sqli_tool.py
-Muncul menu:
+python sqli_tool.py --web
+Buka browser: http://127.0.0.1:5000
 
-text
-1. Full pipeline (Stage 1 -> 2 -> 3)
-2. Stage 1 - Scan Targets
-3. Stage 2 - Validate Findings
-4. Stage 3 - Process Queue (butuh sqlmap)
-5. Cek status sqlmap
-6. Keluar
+Di UI ada 4 tombol:
+
+Scan Targets — Stage 1 (Ambil 30 dork random, crawl pake Bing/Yahoo/DDG)
+
+Validate Findings — Stage 2 (Cek SQLi pake payload ')
+
+Process Queue — Stage 3 (Tembak SQLmap)
+
+Run Full Pipeline — Stage 1 → 3 otomatis
+
+Plus tombol:
+
+Hapus Hasil — Bersihin folder hasil/
+
+Lihat Crawl / Vuln / Dump — Liat isi file output
+
 Mode CLI — Langsung via Flag
 bash
 # Full pipeline
 python sqli_tool.py --mode full
 
-# Cuma Stage 1
+# Cuma Stage 1 (Scan)
 python sqli_tool.py --mode dork
 
-# Cuma Stage 2
+# Cuma Stage 2 (Validate)
 python sqli_tool.py --mode check
 
-# Cuma Stage 3
+# Cuma Stage 3 (SQLmap)
 python sqli_tool.py --mode sqlmap
+🧠 Fitur Utama (Update Terbaru)
+Multi-Engine Scraper: Gak cuma Bing, tapi juga nembak Yahoo dan DuckDuckGo. Kalo satu engine nge-blok, otomatis pindah ke engine lain.
 
-# Custom teknik & DBMS
-python sqli_tool.py --mode sqlmap --technique BEU --dbms mysql
+Anti-Hang (30 Random Dorks): Tiap kali Scan Targets, tool cuma ngambil 30 dork acak dari dorks.txt. Ini biar laptop gak nge-hang dan hasilnya lebih variatif.
 
-# sqlmap di path custom
-python sqli_tool.py --sqlmap-path /opt/sqlmap/sqlmap.py
-Mode Web (Flask)
-bash
-python sqli_tool.py --web
-# atau custom host/port (akses dari LAN)
-python sqli_tool.py --web --host 0.0.0.0 --port 8080
-Buka browser: http://127.0.0.1:5000
+Auto-Save ke /hasil: Semua output (URL crawl, URL vuln, dump sqlmap) otomatis masuk ke folder hasil/. Gak bakal berserakan lagi.
 
-Di UI ada 4 tombol:
+Anti-Duplikat: Folder hasil/ gak bakal ke-commit ke Git (kalo lo pake .gitignore).
 
-Scan Targets — Stage 1
+Tanpa Library Berat: Gak pake Selenium, YOLO, atau undetected-chromedriver. Cuma pake curl_cffi yang ringan.
 
-Validate Findings — Stage 2
-
-Process Queue — Stage 3 (butuh sqlmap)
-
-Run Full Pipeline — Stage 1 → 3 otomatis
-
-Plus endpoint /health buat cek status sqlmap:
-
-bash
-curl http://127.0.0.1:5000/health
-Response:
-
-json
-{
-  "sqlmap_found": true,
-  "sqlmap_path": "/usr/bin/sqlmap",
-  "sqlmap_version": "1.8.4#stable"
-}
 📤 Output
 File / Folder	Isi
-raw_urls.txt	Hasil Stage 1 — URL ber-param dari dork
-vuln_urls.txt	Hasil Stage 2 — URL yang confirmed error-based
-sqlmap_output/	Hasil Stage 3 — dump sqlmap per target (1 folder per URL)
+hasil/urls_crawl.txt	Hasil Stage 1 — URL ber-param dari dork
+hasil/urls_vuln.txt	Hasil Stage 2 — URL yang confirmed error-based
+hasil/sqlmap_dump/	Hasil Stage 3 — dump sqlmap per target (1 folder per URL)
 ⚙️ Konfigurasi
 files/dorks.txt
 Satu dork per baris. Baris diawali # = komentar.
@@ -217,39 +176,21 @@ Flag	Default	Fungsi
 --technique	E	Teknik sqlmap (E=error, B=boolean, U=union, T=time)
 --dbms	mysql	DBMS target
 --sqlmap-path	sqlmap	Path custom ke sqlmap
---skip-sqlmap-check	off	Skip validasi sqlmap (gak disaranin)
-🧪 Teknik sqlmap yang Didukung
-Flag	Teknik	Kapan dipake
-E	Error-based	Default, paling cepet kalo target ngasih error
-B	Boolean-based blind	Kalo gak ada error tapi response beda true/false
-U	Union-based	Kalo jumlah kolom bisa ditebak
-T	Time-based blind	Kalo gak ada output sama sekali
-BEU	Kombinasi	Biar sqlmap auto-detect
-Contoh:
-
-bash
-python sqli_tool.py --mode sqlmap --technique BEU
 🛠️ Troubleshooting
+Hasil dorking 0 URL terus
+→ IP lo mungkin lagi di-rate-limit sama search engine. Coba ganti jaringan (Tethering HP) atau tunggu beberapa jam.
+
 sqlmap gak ketemu
 → Install sqlmap (lihat section di atas) atau pake --sqlmap-path.
 
 Bing kosong, fallback DDG...
-→ Wajar, Bing kadang kena anti-bot. Fallback ke DuckDuckGo otomatis.
-
-Hasil dorking dikit
-→ Tambahin dork di files/dorks.txt, atau pake Google Custom Search API buat hasil lebih stabil.
+→ Wajar, Bing kadang kena anti-bot. Fallback ke Yahoo/DDG otomatis.
 
 Stage 1 lama banget
-→ Terlalu banyak dork. Pake batch: cp files/dorks_batch_01.txt files/dorks.txt. Atau tambahin delay di run_scraper().
+→ Wajar, karena ada jeda 5 detik per dork biar gak di-ban. Tool cuma ngambil 30 dork random, jadi paling lama nunggu 2-3 menit.
 
-ModuleNotFoundError: No module named 'flask'
-→ pip install flask
-
-ModuleNotFoundError: No module named 'requests'
-→ pip install -r requirements.txt
-
-sqlmap stuck / lambat
-→ Turunin --level / --risk / --threads di sqli_tool.py bagian run_sqlmap().
+ModuleNotFoundError
+→ Jalanin pip install -r requirements.txt lagi.
 
 ⚠️ Disclaimer
 Tool ini dibuat buat pembelajaran, lab, dan target yang lo punya izin eksplisit. Pake ke target orang tanpa izin itu ilegal dan di luar tanggung jawab author. Gunakan dengan bijak.
