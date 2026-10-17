@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recon Pipeline — Project fabz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="grid-floor" aria-hidden="true"></div>
+
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M12 2l8 3.5v5.2c0 5-3.4 8.9-8 10.3-4.6-1.4-8-5.3-8-10.3V5.5L12 2z"/>
+          <path d="M9 12l2 2 4-4" stroke-width="1.8"/>
+        </svg>
+      </div>
+      <div>
+        <h1>Recon Pipeline</h1>
+        <p class="tagline">Automated recon &amp; target discovery — Project fabz</p>
+      </div>
+    </div>
+    <div class="status-group">
+      <span class="status-pill"><i class="dot"></i>Engine ready</span>
+      <span class="credit">built by <strong>fabz</strong></span>
+    </div>
+
+    <!-- BANNER BETA -->
+    <div style="background: rgba(255, 45, 120, 0.1); border: 1px solid var(--magenta); border-radius: 8px; padding: 8px 16px; margin-top: 16px; width: 100%; text-align: center; color: #ffb3c6; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 8px;">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+        <line x1="12" y1="9" x2="12" y2="13"></line>
+        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+      </svg>
+      <span><strong>BETA VERSION:</strong> Tool ini masih dalam tahap pengembangan. Fitur & logika deteksi bisa berubah sewaktu-waktu. Gunakan dengan bijak.</span>
+    </div>
+  </header>
+
+  <section class="hero" aria-hidden="true">
+    <div class="hero-scene">
+      <div class="shield-3d">
+        <div class="shield-face front"></div>
+        <div class="shield-face back"></div>
+        <div class="ring ring-a"></div>
+        <div class="ring ring-b"></div>
+        <div class="core"></div>
+      </div>
+    </div>
+    <div class="hero-scan"></div>
+  </section>
+
+  <main class="grid">
+    <section class="card pipeline">
+      <h2>Pipeline Actions</h2>
+      <p class="muted">Jalankan tahap recon yang lo mau. Semua hasil otomatis tersimpan ke file.</p>
+
+      <div class="actions">
+        <button class="btn" id="btn-dork" onclick="runTask('dork')">
+          <span class="btn-icon">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6">
+              <circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.3-4.3"/>
+            </svg>
+          </span>
+          <span class="btn-text">
+            <span class="btn-title">Scan Targets</span>
+            <span class="btn-sub">Stage 1 — discovery</span>
+          </span>
+        </button>
+
+        <button class="btn" id="btn-check" onclick="runTask('check')">
+          <span class="btn-icon">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6">
+              <path d="M12 3l7 3v5c0 4.4-3 8-7 9-4-1-7-4.6-7-9V6l7-3z"/>
+              <path d="M9.5 12l1.8 1.8L15 10"/>
+            </svg>
+          </span>
+          <span class="btn-text">
+            <span class="btn-title">Validate Findings</span>
+            <span class="btn-sub">Stage 2 — verification</span>
+          </span>
+        </button>
+
+        <button class="btn" id="btn-sqlmap" onclick="runTask('sqlmap')">
+          <span class="btn-icon">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6">
+              <ellipse cx="12" cy="6" rx="7" ry="2.6"/>
+              <path d="M5 6v6c0 1.4 3.1 2.6 7 2.6s7-1.2 7-2.6V6"/>
+              <path d="M5 12v6c0 1.4 3.1 2.6 7 2.6s7-1.2 7-2.6v-6"/>
+            </svg>
+          </span>
+          <span class="btn-text">
+            <span class="btn-title">Process Queue</span>
+            <span class="btn-sub">Stage 3 — execution</span>
+          </span>
+        </button>
+
+        <button class="btn primary" id="btn-full" onclick="runTask('full')">
+          <span class="btn-icon">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6">
+              <path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/>
+            </svg>
+          </span>
+          <span class="btn-text">
+            <span class="btn-title">Run Full Pipeline</span>
+            <span class="btn-sub">Stage 1 → 3 otomatis</span>
+          </span>
+        </button>
+      </div>
+    </section>
+
+    <section class="card" style="display: flex; flex-direction: column;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <div>
+          <h2 style="margin: 0;">Execution Log</h2>
+          <p class="muted" style="margin: 4px 0 0 0;">Realtime output dari tahap yang sedang jalan.</p>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn" id="btn-stop" onclick="stopTask()" style="display: none; padding: 6px 12px; background: rgba(255,45,120,0.2); border-color: var(--magenta); color: #fff; font-weight: bold;">STOP</button>
+        </div>
+      </div>
+      <pre id="log" class="console">Idle. Pilih tahap buat mulai recon.</pre>
+    </section>
+
+    <section class="card span-2">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <div>
+          <h2 style="margin: 0;">Saved Results</h2>
+          <p class="muted" style="margin: 4px 0 0 0;">Hasil crawl, cek vuln, dan dump SQLmap.</p>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn" onclick="loadResult('crawl')" style="padding: 6px 12px;">Lihat Crawl</button>
+          <button class="btn" onclick="loadResult('vuln')" style="padding: 6px 12px;">Lihat Vuln</button>
+          <button class="btn" onclick="loadResult('sqlmap')" style="padding: 6px 12px;">Lihat Dump</button>
+          <button class="btn" onclick="clearResults()" style="padding: 6px 12px; background: rgba(255,0,0,0.2); border-color: #ff0000; color: #fff;">Hapus Hasil</button>
+        </div>
+      </div>
+      <pre id="result" class="console">Klik salah satu tombol di atas buat liat isi file.</pre>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>Recon Pipeline — Project fabz</span>
+    <span class="dot-sep">•</span>
+    <span>Credit: fabz</span>
+  </footer>
+</div>
+
+<script>
+let eventSource = null;
+let isStopping = false;
+
+function runTask(mode) {
+  const logEl = document.getElementById('log');
+  const resEl = document.getElementById('result');
+  const stopBtn = document.getElementById('btn-stop');
+  
+  if (eventSource) eventSource.close();
+  isStopping = false;
+
+  logEl.textContent = 'Menghubungkan ke server...\n';
+  resEl.textContent = 'Proses jalan... (Cek log)';
+  
+  document.querySelectorAll('.actions .btn').forEach(b => b.style.display = 'none');
+  stopBtn.style.display = 'inline-block';
+  
+  eventSource = new EventSource(`/stream/${mode}`);
+  
+  eventSource.onmessage = function(e) {
+    if (e.data === '[DONE]') {
+      if(!isStopping) logEl.textContent += '\n[+] Proses selesai.';
+      resetButtons();
+      resEl.textContent = "Pipeline selesai. Klik tombol 'Lihat Crawl/Vuln/Dump' buat liat hasilnya.";
+      return;
+    }
+    logEl.textContent += e.data + '\n';
+    logEl.scrollTop = logEl.scrollHeight;
+  };
+
+  eventSource.onerror = function(err) {
+    if(!isStopping) {
+      logEl.textContent += '\n[!] Koneksi terputus.';
+      resetButtons();
+    }
+  };
+}
+
+function stopTask() {
+  if (eventSource) {
+    isStopping = true;
+    // 1. Kirim sinyal stop ke backend
+    fetch('/stop', { method: 'POST' });
+    
+    // 2. Tutup koneksi stream biar gak lanjut
+    eventSource.close();
+    eventSource = null;
+    
+    document.getElementById('log').textContent += '\n[!] Dihentikan paksa oleh pengguna (STOP).';
+    resetButtons();
+  }
+}
+
+function resetButtons() {
+  document.getElementById('btn-stop').style.display = 'none';
+  document.querySelectorAll('.actions .btn').forEach(b => b.style.display = 'flex');
+}
+
+function loadResult(type) {
+  const resEl = document.getElementById('result');
+  resEl.textContent = 'Memuat data...';
+  
+  fetch(`/get_results/${type}`)
+    .then(res => res.text())
+    .then(data => {
+      if (!data.trim()) {
+        resEl.textContent = "Belum ada data untuk kategori ini.";
+      } else {
+        const lines = data.trim().split('\n');
+        const display = lines.slice(0, 200).join('\n');
+        resEl.textContent = display + (lines.length > 200 ? '\n\n... (dan ' + (lines.length - 200) + ' baris lainnya)' : '');
+      }
+    })
+    .catch(err => resEl.textContent = "Gagal memuat data: " + err);
+}
+
+function clearResults() {
+  if (!confirm("Yakin mau hapus hasil crawl, vuln, dan dump?\n\n(Catatan: Memori History tetap tersimpan, jadi web yang sama gak bakal di-crawl lagi)")) return;
+  
+  fetch('/clear_results', { method: 'POST' })
+    .then(res => res.json())
+    .then(data => {
+      alert(data.message);
+      document.getElementById('result').textContent = "Data sudah dihapus.";
+    })
+    .catch(err => alert("Gagal menghapus: " + err));
+}
+</script>
+</body>
+</html>

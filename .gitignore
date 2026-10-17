@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+
+# Output tool
+hasil/
+raw_urls.txt
+vuln_urls.txt
+sqlmap_output/
+
+# Dork mentah & hasil split
+files/raw_dorks.txt
+files/dorks.txt
+files/sqli.txt
+files/error_sqli.txt
+files/lfi.txt
+files/index_of.txt
+files/password_file.txt
+files/uncategorized.txt
+files/dorks_batch_*.txt
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Log
+*.logyolo12x.pt
+tmp/
+hasil/
+yolo12x.pt
+tmp/
+hasil/
+__pycache__/
+*.pyc
